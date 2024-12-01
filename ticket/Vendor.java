@@ -1,40 +1,45 @@
 package ticket;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class Vendor implements Runnable {
+    private static final AtomicInteger globalTicketId = new AtomicInteger(1);
     private static final AtomicInteger vendorIdCounter = new AtomicInteger(1);
+
     private final int vendorId;
     private final TicketPool ticketPool;
-    private final int ticketReleaseRate; // Number of tickets to add per release
-    private int releaseInterval = 0; // Interval between ticket releases in milliseconds
+    private final int ticketReleaseRate;
+    private final int releaseInterval;
 
-    public Vendor(TicketPool ticketPool, int ticketReleaseRate) {
+    public Vendor(TicketPool ticketPool, int ticketReleaseRate, int releaseInterval) {
         this.vendorId = vendorIdCounter.getAndIncrement();
         this.ticketPool = ticketPool;
         this.ticketReleaseRate = ticketReleaseRate;
         this.releaseInterval = releaseInterval;
     }
 
-    // Method to simulate ticket creation
     private List<Ticket> generateTickets() {
-        return List.of(new Ticket(vendorId, "Event #" + vendorId, 50.0)); // Example single ticket generation
+        List<Ticket> tickets = new ArrayList<>();
+        for (int i = 0; i < ticketReleaseRate; i++) {
+            int ticketId = globalTicketId.getAndIncrement();
+            tickets.add(new Ticket(ticketId, "Event by Vendor #" + vendorId, 50.0));
+        }
+        return tickets;
     }
 
-    // Run method to release tickets at specified intervals
     @Override
     public void run() {
-        while (true) {
+        while (!Thread.currentThread().isInterrupted()) {
             try {
                 List<Ticket> newTickets = generateTickets();
                 ticketPool.addTickets(newTickets);
-                Logger.logInfo("Vendor #" + vendorId + " released " + newTickets.size() + " tickets.");
+                System.out.println("Vendor #" + vendorId + " released " + newTickets.size() + " tickets.");
                 Thread.sleep(releaseInterval);
             } catch (InterruptedException e) {
-                Logger.logError("Vendor #" + vendorId + " interrupted.", e);
+                System.out.println("Vendor #" + vendorId + " interrupted.");
                 Thread.currentThread().interrupt();
-                break;
             }
         }
     }

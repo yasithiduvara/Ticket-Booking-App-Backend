@@ -21,13 +21,14 @@ public class Customer implements Runnable {
             try {
                 Ticket ticket = ticketPool.removeTicket();
                 if (ticket != null) {
-                    Logger.logInfo("Customer #" + customerId + " purchased " + ticket);
+                    System.out.println("Customer #" + customerId + " purchased " + ticket);
                 } else {
                     Logger.logInfo("Customer #" + customerId + " attempted to purchase a ticket, but none were available.");
                 }
                 Thread.sleep(purchaseInterval);
             } catch (InterruptedException e) {
                 Logger.logError("Customer #" + customerId + " interrupted.", e);
+
                 Thread.currentThread().interrupt();
                 break;
             }

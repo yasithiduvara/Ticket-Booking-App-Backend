@@ -15,15 +15,22 @@ public class TicketingSystemApp {
 
         // Step 3: Create and start vendor threads (Producers)
         for (int i = 0; i < config.getVendorCount(); i++) {
-            Vendor vendor = new Vendor(ticketPool, config.getTicketReleaseRate());
-            Thread vendorThread = new Thread(vendor);
+            Vendor vendor = new Vendor(
+                    ticketPool,
+                    config.getTicketReleaseRate(),
+                    1000 // Example release interval in milliseconds
+            );
+            Thread vendorThread = new Thread(vendor, "Vendor-" + (i + 1));
             vendorThread.start();
         }
 
         // Step 4: Create and start customer threads (Consumers)
         for (int i = 0; i < config.getCustomerCount(); i++) {
-            Customer customer = new Customer(ticketPool, config.getCustomerRetrievalRate());
-            Thread customerThread = new Thread(customer);
+            Customer customer = new Customer(
+                    ticketPool,
+                    1500 // Example retrieval interval in milliseconds
+            );
+            Thread customerThread = new Thread(customer, "Customer-" + (i + 1));
             customerThread.start();
         }
 
